@@ -15,4 +15,3 @@ Array.prototype.map —— css-loader
 Array.prototype.forEach
 Function.prototype.bind
 
-
