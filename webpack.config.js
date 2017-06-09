@@ -31,11 +31,9 @@ if (isProduction) {
 		new UglifyJSPlugin({
 			mangleProperties: {
 				screw_ie8: false,
-				//ignore_quoted: true,      // do not mangle quoted properties and object keys
 			},
 			compress: {
 				screw_ie8: false,
-				//properties: false // optional: don't convert foo["bar"] to foo.bar
 			},
 			output: {
 				screw_ie8: false
@@ -44,10 +42,14 @@ if (isProduction) {
 	);
 }
 module.exports = {
-	entry: ['./src/entry/img_wap.js'],
+	entry: {
+		imgwap:['./src/entry/img_wap.js'],
+		vsc: ['./src/entry/vsc.js']
+	},
 	output: {
-		filename: 'bundle.js',
-		path: path.resolve(__dirname, 'dist')
+		filename: '[name].js',
+		path: path.resolve(__dirname, 'dist'),
+		publicPath: isProduction ? '/dist/' : '/'
 	},
 	module: {
 		loaders: [
@@ -58,6 +60,9 @@ module.exports = {
             {
             	test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
             	loader: 'file-loader?name=assets/[hash].[ext]'
+        	},{
+            	test: /\.html$/,
+            	loader: `html-loader?minimize=${isProduction}`
         	}
 		]
 	},
@@ -72,7 +77,8 @@ module.exports = {
 	    compress: isProduction,
 	    inline: !isProduction,
 	    // hot: !isProduction,
-	    host: '0.0.0.0',
+	    // host: '0.0.0.0',
+	    host: '192.168.32.252',
 	    stats: {
 	      assets: true,
 	      children: false,

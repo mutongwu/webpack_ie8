@@ -1,11 +1,117 @@
 @import './base.styl'
 @import './sprite.styl'
 
-body
-	background #ccc
-a
-	border-radius: 5px	10px
-.close-btn
-	sprite($icon_success_least_small_2x)
-.close-button
-	sprite($icon_success_least_small_3x)
+code_input_height = 40px
+
+.vip_secure_code_modal
+	z-index 999
+	background rgba(0,0,0,0.5)
+	position fixed
+	top 0
+	left 0
+	width 100%
+	height 100%
+	visibility hidden
+	&.vipsc_show
+		visibility visible
+.vip_secure_code_box
+	position fixed
+	padding 0
+	font-size 12px
+	line-height 100%
+	box-sizing border-box
+	width cal_dim(604)
+	max-width unit(604/2, 'px')
+	// height cal_dim(348)
+	// max-height unit(348/2, 'px')
+	border-radius 5px
+	background #fff
+	transform translate(-50%,-50%)
+	top 50%
+	left 50%
+	.vipsc_inner
+		.vipsc_hd,.vipsc_bd
+			padding 0 cal_dim(30)
+		.vipsc_hd
+			padding-top cal_dim(40)
+			padding-bottom cal_dim(40)
+			font-size 18px
+			line-height 18px
+			text-align center
+			font-weight bold
+		.vipsc_bd
+			.vipsc_field_box
+				position relative
+				border 1px solid #C7C7CF
+				border-radius 4px
+				height code_input_height
+				padding-left 10px
+				overflow hidden
+				.vipsc_code_input
+					float left
+					border 0
+					outline none
+					-webkit-appearance:none
+					width 100px
+					height 32px
+					line-height 32px
+					font-size 16px
+					padding-top 3px
+				.vipsc_code_img_box
+					position relative
+					float right
+					width percentage(160/540) //540px 是输入框区域的宽度
+					height code_input_height
+					.vipsc_code_img
+						position absolute
+						top 0
+						bottom 0
+						margin auto
+						width 100%
+				.vipsc_code_refresh
+					display inline-block
+					position relative
+					float right
+					width percentage(80/540)
+					height code_input_height
+					.vipsc_icon_refresh
+						position absolute
+						top 0
+						left 0
+						bottom 0
+						right 0
+						margin auto
+						display inline-block
+						sprite($icon_refresh_normal_3x)
+						zoom 0.5
+			.vipsc_msg
+				color #EC5042
+				white-space nowrap
+				overflow hidden
+				text-overflow ellipsis
+				font-size 12px
+		.vipsc_ft
+			border-top 1px solid #D8D8D8
+			.vipsc_btns_box
+				overflow hidden
+			.vipsc_btn
+				width 50%
+				height 43px
+				display inline-block
+				float right
+				text-align center
+				line-height 43px
+				font-size 16px
+				color #157EFA 
+				&:first-of-type
+					float left
+					position relative
+					&:after
+						content ""
+						position absolute
+						width 1px
+						height 100%
+						background #D8D8D8
+						top 0
+						right 0
+						z-index 1
