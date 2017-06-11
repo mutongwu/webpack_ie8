@@ -38,7 +38,7 @@ var vipsc = {
 		return this;
 	},
 	JSON: window.JSON,
-	jsUtil： jsUtil,
+	jsUtil:jsUtil,
 	ajax: ajax,
 	Messenger: messenger,
 	Dom:Dom
