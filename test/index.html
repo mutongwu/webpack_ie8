@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+    <head>
+	    <meta charset="UTF-8" />
+		<meta content="initial-scale=1.0,user-scalable=no,maximum-scale=1,width=device-width" name="viewport" />
+		<meta content="yes" name="apple-mobile-web-app-capable" />
+		<meta content="black" name="apple-mobile-web-app-status-bar-style" />
+		<meta content="telephone=no" name="format-detection" />
+		<title>验证码组件</title>
+		<style>
+			.form-el{
+				padding: 30px;
+				border:1px solid black;
+			}
+		</style>
+	</head>
+	<body>
+		
+	<script type="text/javascript" src="../dist/vsc.js"></script>
+	<script type="text/javascript">
+
+		var configObject = {
+			url: '../dist/imgwap.js',
+			params: {
+				v: 1,
+				challengeId: 'xxxx',
+				captchaType: 2,
+				data: {}
+			}
+		};
+		function loadWap(argument) {
+			// body...
+			var instance = null;
+			VipSecureCode.load({
+				url: configObject.url,
+				data: configObject.params,
+				success: function(){
+
+					// 初始化实例
+					instance = new VipSecureCode.ImageSecureCode({
+						exCls: 'customeCls',
+						params: configObject.params,
+						onCancel: function(){
+							console.log('cancel click.');
+						},
+						onClose: function(){
+							console.log('modal  closed.');
+						}
+					});
+
+
+					// 显示元素
+					instance.show();
+
+				},
+				error:  function(){
+					console.error('imgwap.js load error');
+				}
+			})
+		}
+
+		function loadPc(argument) {
+			// body...
+		}
+
+	</script>
+
+		<input type="button" onclick="loadWap()" value="图片验证码： wap弹窗" />
+
+		<input type="button" onclick="loadPc()" value="图片验证码： pc内嵌" />
+
+		<div class="form-el">
+			<div id="secure-code">
+				
+			</div>
+		</div>
+	</body>
+</html>

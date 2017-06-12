@@ -12,97 +12,8 @@ var ajax = VipSecureCode.ajax;
 var JSON = VipSecureCode.JSON;
 var Dom = VipSecureCode.Dom;
 var Messenger = VipSecureCode.Messenger;
+var corsPoster = VipSecureCode.poster;
 
-
-function CorsPost(){
-	this.doPost = null;
-}
-CorsPost.prototype = {
-	iframeEl: null,
-	formEl:null,
-	messenger: null,
-	callbacks: {
-		success: null,
-		error: null
-	},
-	isCorsSupport: 'XMLHttpRequest' in window && 'withCredentials' in new XMLHttpRequest(),
-	init: function(){
-		var self = this;
-		if (isCorsSupport) {
-			this.doPost = this.ajaxPost;
-		} else {
-			this.doPost = this.iframePost;
-			Dom.ready(function(){
-				self.initIframe();
-
-				self.initMessenger();
-				self.initForm();
-			});
-		}
-	},
-	initMessenger: function(){
-		this.messenger = new Messenger('Parent', 'vip_secure_code');
-		messenger.listen(function(res){
-			try{
-				res = JSON.parse(res);
-				if (res && res.code === 200) {
-					self.callbacks.success && self.callbacks.success(res);
-				} else {
-					self.callbacks.error && self.callbacks.error(res);
-				}
-			}catch(e){
-				self.callbacks.error && self.callbacks.error(e);
-			}
-		});
-	},
-
-	initIframe: function(){
-		var el = document.createElement('iframe');
-		var id = jsUtil.id('vsc');
-		el.setAttribute('id', id);
-		el.setAttribute('name', id);
-		el.style.display = 'none';
-		el.style.frameborder = 'none';
-		el.style.width = '1px';
-		el.style.height = '1px';
-		document.body.appendChild(el);
-		this.iframeEl = el;
-	},
-	initForm: function(){
-		var el = document.createElement('form');
-		var id = jsUtil.id('vsc');
-		el.setAttribute('id', id);
-		el.setAttribute('name', id);
-		el.style.display = 'none';
-		el.style.frameborder = 'none';
-		el.style.width = '1px';
-		el.style.height = '1px';
-		el.setAttribute('target', this.iframeEl.id);
-		el.setAttribute('method', 'post');
-		document.body.appendChild(el);
-		this.formEl = el;
-	},
-	ajaxPost: function(o){
-		return ajax(o);
-	},
-	iframePost: function(o){
-		this.formEl.setAttribute('action', o.url);
-		this.callbacks.success = o.success;
-		this.callbacks.error = o.error;
-		this.formEl.innerHTML = this.createInputField(o.data);
-		this.formEl.submit();
-	},
-	createInputField: function(data){
-		var str = '';
-		var template = '<input type="hidden" name="{{NAME}}" value="{{VALUE}} />';
-		if(data) {
-			for (var p in data) {
-				str += template.replace('{{NAME}}', p).replace('{{VALUE}}', data[p]);
-			}
-		}
-		return str;
-	}
-}
 function ImageSecureCode(o){
 	var defaultCfg = {
 		id: jsUtil.id(),
@@ -114,6 +25,7 @@ function ImageSecureCode(o){
 			captchaType: 2,
 			data: {}
 		},
+		success: function(){},
 		onKeyUp:null,
 		onShow: null,
 		onHide: null,
@@ -124,7 +36,7 @@ function ImageSecureCode(o){
 	};
 	this.config = {
 		// 所有交互的元素
-		elements: null,
+		elements: {},
 		// 组件根节点元素
 		contextEl: null
 	};
@@ -172,6 +84,7 @@ ImageSecureCode.prototype = {
 
 			// 事件初始化
 			self.bindEvent();
+
 		});
 	},
 	bindEvent: function(){
@@ -203,7 +116,7 @@ ImageSecureCode.prototype = {
 				return;
 			}
 			target.setAttribute('loading', true);
-			self.reloadImage().always(function(){
+			self.reloadImage(function(){
 				target.removeAttribute('loading')
 			});
 			self.marsData(target, event);
@@ -223,7 +136,7 @@ ImageSecureCode.prototype = {
 	setEls: function(contextEl, idMap){
 		this.config.contextEl = contextEl;
 		for(var id in idMap) {
-			this.config.elements[id] = document.getElementById(id);
+			this.config.elements[id] = document.getElementById(idMap[id]);
 		}
 	},
 	marsData: function(el, ev) {
@@ -238,6 +151,7 @@ ImageSecureCode.prototype = {
 			Dom.removeListener(els[id], Dom.Event.ON_CLICK);
 		}
 	},
+
 	showMsg: function(str){
 		var msgEl = self.config.elements['MSG'];
 		msgEl.innerHTML = msg;
@@ -250,9 +164,30 @@ ImageSecureCode.prototype = {
 	},
 	// 校验图片
 	checkCode: function(code){
-
+		var self = this;
+		code = code.replace(/^\s+/,'').replace(/\s+$/,'');
+		if (!code){
+			this.showMsg();
+		}
+		this.hideMsg();
+		corsPoster.doPost({
+			url: this.CHECK_API,
+			data: this.config.queryData,
+			method: 'post',
+			withCredentials:true,
+			type:'json',
+			success: function(res){
+				if (res && res.code === 200){
+					self.config.success(res.data);
+					self.destroy();
+				}
+			},
+			error: function(res){
+				self.showMsg(res && res.msg || '验证失败');
+			}
+		});
 	},
-	reloadImage: function() {
+	reloadImage: function(callback) {
 		var self = this;
 		return ajax({
 			url: this.GET_API,
@@ -267,11 +202,16 @@ ImageSecureCode.prototype = {
 			},
 			error: function(res){
 				self.showMsg(res && res.msg)
+			},
+			always:function(){
+				callback && callback();
 			}
 		});
 	},
 	close: function(type){
 		this.config.onClose && this.config.onClose.call(this, type);
+		this.destroy();
+		Dom.remove(this.config.contextEl);
 	},
 	destroy: function(){
 		this.unbindEvent();
@@ -283,7 +223,7 @@ ImageSecureCode.prototype = {
 
 	},
 	show: function(){
-		Dom.addClass(this.config.contextEl, 'vipsc_show');
+		Dom.addClass(this.config.contextEl.firstChild, 'vipsc_show');
 		this.config.onShow && this.config.onShow();
 		return this;
 	}
@@ -311,65 +251,34 @@ Wrapper.prototype = {
 		return this.instance.show();
 	}
 };
-module.exports = Wrapper;
 
-// var validateObj = new Wrapper();
-// function VipSecureCode(cfg){
-// 	var defaultCfg = {
-// 		vType: 'image', // image/slider
-// 		uxType: 'inline', // inline/modal
-// 		data:{},
+VipSecureCode.ImageSecureCode = Wrapper;
+// module.exports = Wrapper;
 
 
-// 	};
-// 	this.init(cfg)
-// }
-// VipSecureCode.prototype = {
-// 	init: function(cfg){
-// 		if (this.config.vType === 'image') {
+setTimeout(function(){
+	var configObject = {
+		url: '../dist/imgwap.js',
+		params: {
+			v: 1,
+			challengeId: 'xxxx',
+			captchaType: 2,
+			data: {}
+		}
+	};	
+	// 初始化实例
+	var instance = new VipSecureCode.ImageSecureCode({
+		exCls: 'customeCls',
+		params: configObject.params,
+		onCancel: function(){
+			console.log('cancel click.');
+		},
+		onClose: function(){
+			console.log('modal  closed.');
+		}
+	});
 
-// 		} else if (this.config.vType === 'slider') {
 
-// 		} else {
-// 			console.error('invalid vType:' + this.config.vType);
-// 		}
-// 	}
-// };
-// {
-// 	load: function(){
-// 		return this;
-// 	},
-// 	createInstance: function(){
-
-// 	}
-// }
-// function VipSecureCodeLoader(){
-// 	function loaderFn(){
-
-// 	}
-// 	return new loaderFn();
-// }
-
-// var aLoader = VipSecureCodeLoader();
-// var scriptEl = aLoader.load({
-// 	url: '',
-// 	data:{
-
-// 	},
-// 	success: null,
-// 	error: null,
-// 	timeout: 6000,
-// }).then(function(VipSecureCode){
-// 	var instance = VipSecureCode.create({
-// 		id: 'J_div',
-// 		data: {},
-// 		options:{
-// 		}
-// 	});
-// 	// instance.destroy();
-// 	// instance.destroy();
-
-// 	var result = instance.validate();
-
-	
-// }, function(){})
+	// 显示元素
+	instance.show();
+}, 2000)

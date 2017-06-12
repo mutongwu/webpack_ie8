@@ -1,10 +1,16 @@
 require('../lib/es5-shim-lite');
-var jsUtil = require('../utils/jsUtil');
 
-var ajax = require('../utils/ajax');
+var ajax = require('reqwest');
+
 var messenger = require('../lib/messenger');
 var Dom = require('../lib/dom');
+var CorsPost = require('../utils/corspost');
+var jsUtil = require('../utils/jsUtil');
+
 var vipsc = {
+	cache: {
+
+	},
 	/**
 	* @param obj {Object} js加载
 	*/
@@ -12,6 +18,9 @@ var vipsc = {
 		var url = obj.url;
 		var params = '';
 		var data = obj.data;
+		if (this.cache[url]) {
+			return this.cache[url];
+		}
 		if (data && typeof data === 'object') {
 			for (var p in data) {
 				params += p + '=' + encodeURIComponent(data[p]);
@@ -21,7 +30,13 @@ var vipsc = {
 			url += url.indexOf('?') === -1 ? '?' : '&';
 			url += params;
 		}
-		return jsUtil.loadJs(obj.url, obj.success, obj.error, obj.timeout);
+		this.cache[url] =  jsUtil.loadJs(obj.url, obj.success, obj.error, obj.timeout);
+
+		this.initPoster();
+		return this.cache[url];
+	},
+	initPoster: function(){
+		this.poster = new CorsPost();
 	},
 	/**
 	* @param o {Object} 配置信息
@@ -41,7 +56,8 @@ var vipsc = {
 	jsUtil:jsUtil,
 	ajax: ajax,
 	Messenger: messenger,
-	Dom:Dom
+	Dom: Dom,
+	CorsPost: CorsPost
 };
 
 if (window.VipSecureCode) {
