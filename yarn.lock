@@ -3004,6 +3004,12 @@ to-arraybuffer@^1.0.0:
   version "1.0.1"
   resolved "http://registry.npm.taobao.org/to-arraybuffer/download/to-arraybuffer-1.0.1.tgz#7d229b1fcc637e466ca081180836a7aabff83f43"
 
+to-string-loader@^1.1.5:
+  version "1.1.5"
+  resolved "http://registry.npm.taobao.org/to-string-loader/download/to-string-loader-1.1.5.tgz#7b7aa17891b7bb4947a7a11bfb03b5fde9c6e695"
+  dependencies:
+    loader-utils "^0.2.16"
+
 toposort@^1.0.0:
   version "1.0.3"
   resolved "http://registry.npm.taobao.org/toposort/download/toposort-1.0.3.tgz#f02cd8a74bd8be2fc0e98611c3bacb95a171869c"

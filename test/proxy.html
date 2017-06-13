@@ -10,7 +10,33 @@
 	</head>
 	<body>
 		
-	<script type="text/javascript" src="../src/lib.js"></script>
+	<script type="text/javascript" src="../src/lib/json3.min.js"></script>
+	<script type="text/javascript" src="../src/lib/messenger.js"></script>
+	<script>
+		var IFRAME_NAME = 'vsc_cors_iframe', 
+			PARENT_NAME = 'vsc_cors_parent', 
+			NAME_PREFIX = 'vip_secure_code';
+		var messenger = new Messenger(IFRAME_NAME, NAME_PREFIX);
 
+	    function sendMessage(msg) {
+	        messenger.targets[PARENT_NAME].send(JSON.stringify(msg));
+	    }
+		messenger.addTarget(window.parent, PARENT_NAME); 
+
+	    messenger.listen(function (msg) {
+	        
+	        console.log('iframe recive:', msg);
+
+	        var o = JSON.parse(msg);
+	        sendMessage({
+	        	code: 200,
+	        	data: {
+	        		hello: 1000
+	        	}
+	        });
+
+	         console.log('iframe sendMessage:');
+	    });
+	</script>
 	</body>
 </html>

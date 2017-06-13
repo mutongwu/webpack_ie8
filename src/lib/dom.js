@@ -91,7 +91,7 @@
      * @private
      */
     function _isLiteralObject(object) {
-        return object && typeof object === "object" && Object.getPrototypeOf(object) === Object.getPrototypeOf({});
+        return object && typeof object === "object" && object.constructor && object.constructor.prototype || false;//&& Object.getPrototypeOf(object) === Object.getPrototypeOf({});
     }
 
     /**
@@ -250,7 +250,7 @@
     //transition detection
     var transitionSupport = (function() {
         for (var i in vendors) {
-            if (_isString(style[vendors[i] + 'transition'])) {
+            if (style && _isString(style[vendors[i] + 'transition'])) {
                 return true;
             }
         }
@@ -572,7 +572,7 @@
         this.name = this.type = this._e.type;
         this.path = this._e.path;
         this.timeStamp = this._e.timeStamp;
-        if (ie & ie < 9) {
+        if (ie && ie < 9) {
             this.button = this._e.button == 1 ? Dom.Mouse.BUTTON_LEFT : (this._e.button == 4 ? Dom.Mouse.BUTTON_MIDDLE : Dom.Mouse.BUTTON_RIGHT);
         } else if (this._e.hasOwnProperty('which')) {
             this.button = this._e.which == 1 ? Dom.Mouse.BUTTON_LEFT : (this._e.which == 2 ? Dom.Mouse.BUTTON_MIDDLE : Dom.Mouse.BUTTON_RIGHT);
@@ -1606,7 +1606,7 @@
             classes.push(className);
         }
         classes = classes.join(' ');
-        return Dom.attribute(element, {class: classes});
+        return Dom.attribute(element, {'class': classes});
     };
 
     /**
@@ -1632,7 +1632,7 @@
         }
 
         if (!className) {
-            return Dom.attribute(element, {class: null});
+            return Dom.attribute(element, {'class': null});
         }
 
         var classes = Dom.getClass(element);
@@ -1642,7 +1642,7 @@
             return;
         }
         classes.splice(i, 1);
-        return Dom.attribute(element, {class: classes.join(' ')});
+        return Dom.attribute(element, {'class': classes.join(' ')});
 
     };
 

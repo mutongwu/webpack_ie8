@@ -1,0 +1,66 @@
+@import './base.styl'
+@import './sprite.styl'
+
+code_input_height = 40px
+font-size = 14px
+line_height = 32px
+font_family = tahoma,arial,Hiragino Sans GB,WenQuanYi Micro Hei,"\5FAE\8F6F\96C5\9ED1","\5b8b\4f53",sans-serif
+
+.vipsc_wrapper
+	.vipsc_v_hide
+		visibility hidden
+	.vipsc_d_hide
+		display none
+		
+.vipsc_pc_box
+	.vipsc_field_box
+		.vipsc_label
+			display inline-block
+			font-family font_family
+			font-size: font-size
+			line-height  line_height
+			
+			vertical-align: middle
+			margin-right: 10px
+			cursor: pointer
+		.vipsc_field_group
+			position: relative
+		    display: inline-block
+		    vertical-align: top
+		    transition: none !important
+		    opacity: 1
+		    .vipsc_code_input
+				width: 120px
+				height: 18px
+				font-family font_family
+				line-height: 18px
+				padding: 6px 10px
+				font-size: font-size
+				float left
+				color: #333
+				background-color: #fff
+				border: 1px solid #b2b2b2
+				border-radius: 3px
+				outline: none
+				transition: border-color .3s cubic-bezier(0.39,0.575,0.565,1), background-color .3s cubic-bezier(0.39,0.575,0.565,1)
+				&:hover,&:focus
+					border-color: #666
+			.vipsc_code_refresh
+				float left
+				display: inline-block
+				font-family font_family
+				font-size: font-size
+				line-height  line_height
+				
+				vertical-align: middle
+				margin-right: 10px
+				cursor: pointer
+				font-size 12px
+				color #1d94d1
+			.vipsc_code_img_box
+				float left
+				display inline-block
+				.vipsc_code_img
+					display inline-block
+					width 96px
+					height 32px

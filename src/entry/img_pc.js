@@ -1,9 +1,9 @@
 // require('../lib/es5-shim-lite');
 
-var styleStr = require('../css/wap.styl');//.toString();
+var styleStr = require('../css/img_pc.styl');//.toString();
 var cssUtil = require('../utils/cssUtil');
 
-var html = require('./img_wap.html');
+var html = require('./img_pc.html');
 
 
 var VipSecureCode = window.VipSecureCode;
@@ -18,6 +18,7 @@ function ImageSecureCode(o){
 	var defaultCfg = {
 		id: jsUtil.id(),
 		exCls: '',
+		targetId:'',
 		// required
 		params:{
 			v: 1,
@@ -77,7 +78,7 @@ ImageSecureCode.prototype = {
 			html = Dom.template(html, self.config);
 
 			el.innerHTML = html;
-			document.body.appendChild(el);
+			document.getElementById(self.config.targetId).appendChild(el);
 
 			// 索引元素
 			self.setEls(el, idMap);
@@ -94,11 +95,11 @@ ImageSecureCode.prototype = {
 			var val = target.value;
 			self.marsData(target, event);
 		});
-		Dom.onFocus(this.config.elements['INPUT'], function(event) {
-			var target = event.target;
-			var val = target.value;
-			self.marsData(target, event);
-		});
+		// Dom.onFocus(this.config.elements['INPUT'], function(event) {
+		// 	var target = event.target;
+		// 	var val = target.value;
+		// 	self.marsData(target, event);
+		// });
 		// Dom.onClick(this.config.elements['IMG'], function(event) {
 		// 	var target = event.target;
 		// 	if (target.getAttribute('loading')) {
@@ -225,7 +226,7 @@ ImageSecureCode.prototype = {
 
 	},
 	show: function(){
-		Dom.addClass(this.config.contextEl.firstChild, 'vipsc_show');
+		Dom.removeClass(this.config.contextEl.firstChild, 'vipsc_v_show');
 		this.config.onShow && this.config.onShow();
 		return this;
 	}
@@ -260,6 +261,9 @@ VipSecureCode.ImageSecureCode = Wrapper;
 
 
 setTimeout(function(){
+	var el = document.createElement('div');
+	el.id = 'demo-id';
+	document.body.appendChild(el);
 	var configObject = {
 		url: '../dist/imgwap.js',
 		params: {
@@ -274,12 +278,8 @@ setTimeout(function(){
 	var instance = new VipSecureCode.ImageSecureCode({
 		exCls: 'customeCls',
 		params: configObject.params,
-		onCancel: function(){
-			console.log('cancel click.');
-		},
-		onClose: function(){
-			console.log('modal  closed.');
-		}
+		targetId: el.id,
+
 	});
 
 

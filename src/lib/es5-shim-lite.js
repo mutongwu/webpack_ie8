@@ -10,10 +10,24 @@ var $Object = Object;
 var ObjectPrototype = $Object.prototype;
 var $Function = Function;
 var FunctionPrototype = $Function.prototype;
+var $String = String;
+var StringPrototype = $String.prototype;
+var $Number = Number;
+var NumberPrototype = $Number.prototype;   
+
+var array_slice = ArrayPrototype.slice;
+var array_splice = ArrayPrototype.splice;
+var array_push = ArrayPrototype.push;
+var array_unshift = ArrayPrototype.unshift;
+var array_concat = ArrayPrototype.concat;
+var array_join = ArrayPrototype.join;
 
 var call = FunctionPrototype.call;
 var apply = FunctionPrototype.apply;
 
+
+var max = Math.max;
+var min = Math.min;
 // Having a toString local variable name breaks in Opera so use to_string.
 var to_string = ObjectPrototype.toString;
 
@@ -26,6 +40,15 @@ var isRegex; /* inlined from https://npmjs.com/is-regex */ var regexExec = RegEx
 var isString; /* inlined from https://npmjs.com/is-string */ var strValue = String.prototype.valueOf, tryStringObject = function tryStringObject(value) { try { strValue.call(value); return true; } catch (e) { return false; } }, stringClass = '[object String]'; isString = function isString(value) { if (typeof value === 'string') { return true; } if (typeof value !== 'object') { return false; } return hasToStringTag ? tryStringObject(value) : to_string.call(value) === stringClass; };
 /* eslint-enable one-var-declaration-per-line, no-redeclare, max-statements-per-line */
 
+/* replaceable with https://npmjs.com/package/es-abstract /helpers/isPrimitive */
+var isPrimitive = function isPrimitive(input) {
+    var type = typeof input;
+    return input === null || (type !== 'object' && type !== 'function');
+};
+
+var isActualNaN = $Number.isNaN || function isActualNaN(x) {
+    return x !== x;
+};
 var ES = {
     // ES5 9.4
     // http://es5.github.com/#x9.4
@@ -253,6 +276,20 @@ defineProperties(FunctionPrototype, {
     }
 });
 
+// _Please note: Shortcuts are defined after `Function.prototype.bind` as we
+// use it in defining shortcuts.
+var owns = call.bind(ObjectPrototype.hasOwnProperty);
+var toStr = call.bind(ObjectPrototype.toString);
+var arraySlice = call.bind(array_slice);
+var arraySliceApply = apply.bind(array_slice);
+var strSlice = call.bind(StringPrototype.slice);
+var strSplit = call.bind(StringPrototype.split);
+var strIndexOf = call.bind(StringPrototype.indexOf);
+var pushCall = call.bind(array_push);
+var isEnum = call.bind(ObjectPrototype.propertyIsEnumerable);
+var arraySort = call.bind(ArrayPrototype.sort);
+
+
 /* inlined from http://npmjs.com/define-properties */
 var supportsDescriptors = $Object.defineProperty && (function () {
     try {
@@ -358,3 +395,67 @@ defineProperties(ArrayPrototype, {
 }, !properlyBoxesContext(ArrayPrototype.map));
 
 
+
+
+// ECMA-262, 3rd B.2.3
+// Not an ECMAScript standard, although ECMAScript 3rd Edition has a
+// non-normative section suggesting uniform semantics and it should be
+// normalized across all browsers
+// [bugfix, IE lt 9] IE < 9 substr() with negative value not working in IE
+var string_substr = StringPrototype.substr;
+var hasNegativeSubstrBug = ''.substr && '0b'.substr(-1) !== 'b';
+defineProperties(StringPrototype, {
+    substr: function substr(start, length) {
+        var normalizedStart = start;
+        if (start < 0) {
+            normalizedStart = max(this.length + start, 0);
+        }
+        return string_substr.call(this, normalizedStart, length);
+    }
+}, hasNegativeSubstrBug);
+
+// ES5 15.5.4.20
+// whitespace from: http://es5.github.io/#x15.5.4.20
+var ws = '\x09\x0A\x0B\x0C\x0D\x20\xA0\u1680\u180E\u2000\u2001\u2002\u2003' +
+    '\u2004\u2005\u2006\u2007\u2008\u2009\u200A\u202F\u205F\u3000\u2028' +
+    '\u2029\uFEFF';
+var zeroWidth = '\u200b';
+var wsRegexChars = '[' + ws + ']';
+var trimBeginRegexp = new RegExp('^' + wsRegexChars + wsRegexChars + '*');
+var trimEndRegexp = new RegExp(wsRegexChars + wsRegexChars + '*$');
+var hasTrimWhitespaceBug = StringPrototype.trim && (ws.trim() || !zeroWidth.trim());
+defineProperties(StringPrototype, {
+    // http://blog.stevenlevithan.com/archives/faster-trim-javascript
+    // http://perfectionkills.com/whitespace-deviations/
+    trim: function trim() {
+        if (typeof this === 'undefined' || this === null) {
+            throw new TypeError("can't convert " + this + ' to object');
+        }
+        return $String(this).replace(trimBeginRegexp, '').replace(trimEndRegexp, '');
+    }
+}, hasTrimWhitespaceBug);
+var trim = call.bind(String.prototype.trim);
+
+var hasLastIndexBug = StringPrototype.lastIndexOf && 'abcあい'.lastIndexOf('あい', 2) !== -1;
+defineProperties(StringPrototype, {
+    lastIndexOf: function lastIndexOf(searchString) {
+        if (typeof this === 'undefined' || this === null) {
+            throw new TypeError("can't convert " + this + ' to object');
+        }
+        var S = $String(this);
+        var searchStr = $String(searchString);
+        var numPos = arguments.length > 1 ? $Number(arguments[1]) : NaN;
+        var pos = isActualNaN(numPos) ? Infinity : ES.ToInteger(numPos);
+        var start = min(max(pos, 0), S.length);
+        var searchLen = searchStr.length;
+        var k = start + searchLen;
+        while (k > 0) {
+            k = max(0, k - searchLen);
+            var index = strIndexOf(strSlice(S, k, start + searchLen), searchStr);
+            if (index !== -1) {
+                return k + index;
+            }
+        }
+        return -1;
+    }
+}, hasLastIndexBug);

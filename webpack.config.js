@@ -26,24 +26,25 @@ var plugins = [
 	})
 ];
 
-if (isProduction) {
-	plugins.push(
-		new UglifyJSPlugin({
-			mangleProperties: {
-				screw_ie8: false,
-			},
-			compress: {
-				screw_ie8: false,
-			},
-			output: {
-				screw_ie8: false
-			}
-		})
-	);
-}
+// if (isProduction) {
+// 	plugins.push(
+// 		new UglifyJSPlugin({
+// 			mangleProperties: {
+// 				screw_ie8: false,
+// 			},
+// 			compress: {
+// 				screw_ie8: false,
+// 			},
+// 			output: {
+// 				screw_ie8: false
+// 			}
+// 		})
+// 	);
+// }
 module.exports = {
 	entry: {
-		imgwap:['./src/entry/img_wap.js'],
+		// imgwap:['./src/entry/img_wap.js'],
+		imgpc:['./src/entry/img_pc.js'],
 		vsc: ['./src/entry/vsc.js']
 	},
 	output: {
@@ -55,7 +56,7 @@ module.exports = {
 		loaders: [
 		    {
 		    	test: /\.styl$/,
-		    	loader: `css-loader?minimize=${isProduction}!postcss-loader!stylus-loader`
+		    	loader: `to-string-loader!css-loader?minimize=${isProduction}!postcss-loader!stylus-loader`
 		    },
             {
             	test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
@@ -77,8 +78,8 @@ module.exports = {
 	    compress: isProduction,
 	    inline: !isProduction,
 	    // hot: !isProduction,
-	    host: '0.0.0.0',
-	    // host: '192.168.32.252',
+	    // host: '0.0.0.0',
+	    host: '192.168.32.252',
 	    stats: {
 	      assets: true,
 	      children: false,

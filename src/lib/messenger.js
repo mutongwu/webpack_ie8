@@ -12,6 +12,17 @@
  * @license release under MIT license
  * @see https://github.com/biqing/MessengerJS
  */
+;(function(name, factory){
+    var moduleName = factory();
+    if (typeof module !== 'undefined' && typeof exports === 'object') {
+        module.exports = moduleName;
+    } else if (typeof define === 'function' && (define.amd || define.cmd)) {
+        define(function() { return moduleName; });
+    } else {
+        this[name] = moduleName;
+    }
+})('Messenger',function(){
+    
 
 // window.Messenger = (function(){
 
@@ -136,8 +147,9 @@
         }
     };
 
-    module.exports = Messenger;
+    // module.exports = Messenger;
 
-    // return Messenger;
+    return Messenger;
 
 // })();
+});

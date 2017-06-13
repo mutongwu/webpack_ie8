@@ -4,7 +4,7 @@ var ajax = require('reqwest');
 
 var messenger = require('../lib/messenger');
 var Dom = require('../lib/dom');
-var CorsPost = require('../utils/corspost');
+var CorsAjax = require('../utils/corsajax');
 var jsUtil = require('../utils/jsUtil');
 
 var vipsc = {
@@ -35,30 +35,39 @@ var vipsc = {
 		this.initPoster();
 		return this.cache[url];
 	},
-	initPoster: function(){
-		this.poster = new CorsPost();
-	},
+
 	/**
 	* @param o {Object} 配置信息
 	* @desc 如果要兼容 IE6/7，必须传递 JSON 的配置信息。
 		组件优先使用 'JSON' 配置属性，或者分别传递 parseJSON/stringifyJSON 方法
 	*/
-	config: function(o){
+	init: function(o){
 		if (!window.JSON) {
 			this.JSON = o.JSON || {
 				stringify: o.stringifyJSON,
 				parse: o.parseJSON
 			};
 		}
+		this.initCors(o && o.xhr2);
 		return this;
+	},
+	initCors: function(xhr2){
+		this.poster = new CorsAjax({
+			JSON: this.JSON,
+			ajax: this.ajax,
+			xhr2: !!xhr2
+		});
+	},
+	getPoster: function(){
+		return this.poster;
 	},
 	JSON: window.JSON,
 	jsUtil:jsUtil,
 	ajax: ajax,
 	Messenger: messenger,
-	Dom: Dom,
-	CorsPost: CorsPost
+	Dom: Dom
 };
+
 
 if (window.VipSecureCode) {
 	console.error('VipSecureCode dulplicated.');
