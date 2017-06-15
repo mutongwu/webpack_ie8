@@ -93,14 +93,14 @@
             }
             
             var msgPairs = msg.split('__Messenger__');
-            var msg = msgPairs[1];
+            var msgTxt = msgPairs[1];
             var pairs = msgPairs[0].split('|');
             var prefix = pairs[0];
             var name = pairs[1];
 
             for(var i = 0; i < self.listenFunc.length; i++){
                 if (prefix + name === self.prefix + self.name) {
-                    self.listenFunc[i](msg);
+                    self.listenFunc[i](msgTxt);
                 }
             }
         };

@@ -1,9 +1,31 @@
-// require('../lib/es5-shim-lite');
-
-var styleStr = require('../css/img_pc.styl');//.toString();
+/**
+** 图片验证码——内嵌组件
+*	var configObject = {
+*		url: '../dist/imgwap.js',
+*		params: {
+*			v: 1,
+*			challengeId: 'xxxx',
+*			captchaType: 2,
+*			data: {}
+*		}
+*	};	
+*	VipSecureCode.init({xhr2:false, JSON: window.JSON3});
+*
+*	// 初始化实例
+*	var instance = new VipSecureCode.ImageSecureCode({
+*		exCls: 'customeCls',  			// 可选，附加样式 class，可以用于自定义调整样式
+*		params: configObject.params, 	// 必填，验证码接口相关参数
+*		targetId: 'target-id' 			// 必填，验证码显示区域节点 id
+*	});
+*
+*
+*	// 显示元素
+*	instance.show();
+*/
+var styleStr = require('../css/img_inline.styl');
 var cssUtil = require('../utils/cssUtil');
 
-var html = require('./img_pc.html');
+var html = require('./img_inline.html');
 
 
 var VipSecureCode = window.VipSecureCode;
@@ -48,8 +70,8 @@ function ImageSecureCode(o){
 	this.init();
 }
 ImageSecureCode.prototype = {
-	GET_API: 'https://captcha.api.vip.com/api/get',
-	CHECK_API: 'https://captcha.api.vip.com/api/check',
+	GET_API: 'http://captcha.api.vip.com:5000/api/get',
+	CHECK_API: 'http://captcha.api.vip.com:5000/api/check',
 	generateDomId: function(){
 		return 	{
 			INPUT: jsUtil.id('vsc'),
@@ -237,28 +259,3 @@ Wrapper.prototype = {
 //export 
 VipSecureCode.ImageSecureCode = Wrapper;
 // module.exports = Wrapper;
-
-
-setTimeout(function(){
-
-	var configObject = {
-		url: '../dist/imgwap.js',
-		params: {
-			v: 1,
-			challengeId: 'xxxx',
-			captchaType: 2,
-			data: {}
-		}
-	};	
-	VipSecureCode.init({xhr2:false, JSON: window.JSON3});
-	// 初始化实例
-	var instance = new VipSecureCode.ImageSecureCode({
-		exCls: 'customeCls',
-		params: configObject.params,
-		targetId: 'target-id'
-	});
-
-
-	// 显示元素
-	instance.show();
-}, 2000)

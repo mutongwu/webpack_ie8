@@ -14,6 +14,5 @@
 Array.prototype.map —— css-loader
 Array.prototype.forEach/Array.prototype.map
 Function.prototype.bind
-String.prototype.trim
 
 

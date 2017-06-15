@@ -20,7 +20,7 @@
 	<script type="text/javascript">
 
 		var configObject = {
-			url: '../dist/imgwap.js',
+			url: '../dist/imgpop.js',
 			params: {
 				v: 1,
 				challengeId: 'xxxx',
@@ -28,6 +28,7 @@
 				data: {}
 			}
 		};
+		VipSecureCode.init();
 		function loadWap(argument) {
 			// body...
 			var instance = null;
@@ -54,13 +55,35 @@
 
 				},
 				error:  function(){
-					console.error('imgwap.js load error');
+					console.error('imgpop.js load error');
 				}
 			})
 		}
 
 		function loadPc(argument) {
-			// body...
+			configObject.url = '../dist/imginline.js';
+			var instance = null;
+			VipSecureCode.load({
+				url: configObject.url,
+				data: configObject.params,
+				success: function(){
+
+					// 初始化实例
+					instance = new VipSecureCode.ImageSecureCode({
+						targetId: 'secure-code',
+						exCls: 'customeCls222',
+						params: configObject.params
+					});
+
+
+					// 显示元素
+					instance.show();
+
+				},
+				error:  function(){
+					console.error('imginline.js load error');
+				}
+			})
 		}
 
 	</script>

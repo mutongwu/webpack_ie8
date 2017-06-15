@@ -2,6 +2,8 @@ var path = require('path');
 var webpack = require('webpack');
 var SpritesmithPlugin = require('webpack-spritesmith');
 var HtmlWebpackPlugin = require('html-webpack-plugin');
+var HtmlWebpackInlineSourcePlugin = require('html-webpack-inline-source-plugin');
+var ManifestPlugin = require('webpack-manifest-plugin');
 var UglifyJSPlugin  =  webpack.optimize.UglifyJsPlugin;
 var nodeEnv = process.env.NODE_ENV || 'development';
 var isProduction = nodeEnv === 'production';
@@ -22,33 +24,43 @@ var plugins = [
         }
     }),
 	new HtmlWebpackPlugin({
-		template: './src/index.ejs'
-	})
+		template: './src/index.ejs',
+		chunks:['vsc']
+	}),
+	new ManifestPlugin()
 ];
-
+var proxyPlugins = [
+	new HtmlWebpackPlugin({
+		inlineSource: '.(js|css)$', // embed all javascript and css inline
+		filename: 'proxy.html',
+		template: './src/proxy.ejs'
+	}),
+	new HtmlWebpackInlineSourcePlugin()
+];
 // if (isProduction) {
-// 	plugins.push(
-// 		new UglifyJSPlugin({
-// 			mangleProperties: {
-// 				screw_ie8: false,
-// 			},
-// 			compress: {
-// 				screw_ie8: false,
-// 			},
-// 			output: {
-// 				screw_ie8: false
-// 			}
-// 		})
-// 	);
+// 	var uglify = new UglifyJSPlugin({
+// 		mangleProperties: {
+// 			screw_ie8: false,
+// 		},
+// 		compress: {
+// 			screw_ie8: false,
+// 		},
+// 		output: {
+// 			screw_ie8: false
+// 		}
+// 	});
+// 	plugins.push(uglify);
+// 	proxyPlugins.push(uglify);
 // }
-module.exports = {
+var baseConfig = {
 	entry: {
 		// imgwap:['./src/entry/img_wap.js'],
-		imgpc:['./src/entry/img_pc.js'],
-		vsc: ['./src/entry/vsc.js']
+		// imgpc:['./src/entry/img_pc.js'],
+		// vsc: ['./src/entry/vsc.js']
 	},
 	output: {
 		filename: '[name].js',
+		// filename: '[name].[chunkhash:8].js',
 		path: path.resolve(__dirname, 'dist'),
 		publicPath: isProduction ? '/dist/' : '/'
 	},
@@ -94,5 +106,23 @@ module.exports = {
 	        green: '\u001b[32m',
 	      },
 	    },
-	  },
-};
+	  }	
+}
+
+var devConfig = Object.assign({}, baseConfig , {
+	entry:{
+		imginline:['./src/entry/img_inline.js'],
+		imgpop:['./src/entry/img_pop.js'],
+		vsc: ['./src/entry/vsc.js']
+	},
+	plugins: plugins
+});
+var proxyConfig = Object.assign({}, baseConfig, {
+	entry:{
+		proxy: ['./src/entry/proxy.js']
+	},
+	plugins: proxyPlugins
+});
+
+
+module.exports = [devConfig, proxyConfig];

@@ -9,8 +9,8 @@ function CorsAjax(o){
 	this.config = jsUtil.extend({
 		JSON: o.JSON,
 		ajax: o.ajax,
-		src: 'http://192.168.32.252:5000/test/proxy.html',
-		xhr2: false
+		src: 'http://captcha.api.vip.com:5000/dist/proxy.html',
+		xhr2: false //如果浏览器支持，优先使用 XHR2
 	}, o);
 	this.init();
 }
@@ -43,8 +43,7 @@ CorsAjax.prototype = {
 		this.messenger = new Messenger(this.PARENT_NAME, this.NAME_PREFIX);
 		this.messenger.listen(function(res){
 			try{
-				console.log('parent receive', res)
-				res = JSON.parse(res);
+				res = self.config.JSON.parse(res);
 				self.callbacks.always && self.callbacks.always(res);
 				if (res && res.code === 200) {
 					self.callbacks.success && self.callbacks.success(res);
@@ -52,7 +51,7 @@ CorsAjax.prototype = {
 					self.callbacks.error && self.callbacks.error(res);
 				}
 			}catch(e){
-				self.callbacks.error && self.callbacks.error(e);
+				self.callbacks.error && self.callbacks.error([e, res].join(','));
 			}
 		});
 		this.messenger.addTarget(this.iframeEl.contentWindow, this.iframeEl.id);
@@ -80,7 +79,7 @@ CorsAjax.prototype = {
 			method: o.method || 'get',
 			data: o.data
 		};
-		console.log("parent send", msg)
+		
 		this.callbacks.success = o.success;
 		this.callbacks.error = o.error;
 		this.callbacks.always = o.always;

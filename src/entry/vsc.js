@@ -32,8 +32,6 @@ var vipsc = {
 			url += params;
 		}
 		this.cache[url] =  jsUtil.loadJs(obj.url, obj.success, obj.error, obj.timeout);
-
-		this.initPoster();
 		return this.cache[url];
 	},
 

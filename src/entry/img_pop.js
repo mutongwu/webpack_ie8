@@ -1,9 +1,40 @@
-// require('../lib/es5-shim-lite');
+/**
+*
+* 图片验证码——弹窗组件
+*
+*	示例:
+*	var configObject = {
+*		url: '../dist/imgwap.js',
+*		params: {
+*			v: 1,
+*			challengeId: 'xxxx',
+*			captchaType: 2,
+*			data: {}
+*		}
+*	};	
+*	VipSecureCode.init({xhr2:false});
 
-var styleStr = require('../css/wap.styl');//.toString();
+*	// 初始化实例
+*	var instance = new VipSecureCode.ImageSecureCode({
+*		exCls: 'customeCls',			// 可选，附加样式 class，可以用于自定义调整样式
+*		params: configObject.params,	// 必填，验证码接口相关参数
+*		onCancel: function(){			// 可选，取消按钮回调函数
+*			console.log('cancel click.');
+*		},
+*		onClose: function(){			// 可选，确认按钮回调函数
+*			console.log('modal  closed.');
+*		}
+*	});
+*
+*
+*	// 显示元素
+*	instance.show();
+*/
+
+var styleStr = require('../css/img_pop.styl');
 var cssUtil = require('../utils/cssUtil');
 
-var html = require('./img_wap.html');
+var html = require('./img_pop.html');
 
 
 var VipSecureCode = window.VipSecureCode;
@@ -12,7 +43,6 @@ var ajax = VipSecureCode.ajax;
 var JSON = VipSecureCode.JSON;
 var Dom = VipSecureCode.Dom;
 var Messenger = VipSecureCode.Messenger;
-// var corsPoster = VipSecureCode.poster;
 
 function ImageSecureCode(o){
 	var defaultCfg = {
@@ -45,8 +75,8 @@ function ImageSecureCode(o){
 	this.init();
 }
 ImageSecureCode.prototype = {
-	GET_API: 'https://captcha.api.vip.com/api/get',
-	CHECK_API: 'https://captcha.api.vip.com/api/check',
+	GET_API: 'http://captcha.api.vip.com:5000/api/get',
+	CHECK_API: 'http://captcha.api.vip.com:5000/api/check',
 	generateDomId: function(){
 		return 	{
 			INPUT: jsUtil.id('vsc'),
@@ -173,7 +203,7 @@ ImageSecureCode.prototype = {
 		this.hideMsg();
 		VipSecureCode.getPoster().doAjax({
 			url: this.CHECK_API,
-			data: this.config.queryData,
+			data: this.queryData,
 			method: 'post',
 			withCredentials:true,
 			type:'json',
@@ -193,7 +223,7 @@ ImageSecureCode.prototype = {
 		VipSecureCode.getPoster().doAjax({
 			url: this.GET_API,
 			data: this.queryData,
-			dataType: 'jsonp',
+			method: 'get',
 			success: function(res){
 				if (res && res.code === 200 && res.data) {
 					self.config.elements['IMG'].src = res.data;
@@ -257,32 +287,3 @@ Wrapper.prototype = {
 //export 
 VipSecureCode.ImageSecureCode = Wrapper;
 // module.exports = Wrapper;
-
-
-setTimeout(function(){
-	var configObject = {
-		url: '../dist/imgwap.js',
-		params: {
-			v: 1,
-			challengeId: 'xxxx',
-			captchaType: 2,
-			data: {}
-		}
-	};	
-	VipSecureCode.init({xhr2:false});
-	// 初始化实例
-	var instance = new VipSecureCode.ImageSecureCode({
-		exCls: 'customeCls',
-		params: configObject.params,
-		onCancel: function(){
-			console.log('cancel click.');
-		},
-		onClose: function(){
-			console.log('modal  closed.');
-		}
-	});
-
-
-	// 显示元素
-	instance.show();
-}, 2000)
