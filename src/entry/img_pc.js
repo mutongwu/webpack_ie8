@@ -12,7 +12,7 @@ var ajax = VipSecureCode.ajax;
 var JSON = VipSecureCode.JSON;
 var Dom = VipSecureCode.Dom;
 var Messenger = VipSecureCode.Messenger;
-// var corsPoster = VipSecureCode.poster;
+var Placeholder = VipSecureCode.Placeholder;
 
 function ImageSecureCode(o){
 	var defaultCfg = {
@@ -26,6 +26,8 @@ function ImageSecureCode(o){
 			captchaType: 2,
 			data: {}
 		},
+		label: 'left',// top, left, none
+		labelText: '安全校验',
 		success: function(){},
 		onKeyUp:null,
 		onShow: null,
@@ -52,29 +54,29 @@ ImageSecureCode.prototype = {
 		return 	{
 			INPUT: jsUtil.id('vsc'),
 			REFRESH: jsUtil.id('vsc'),
-			REFRESH_ICON: jsUtil.id('vsc'),
-			IMG: jsUtil.id('vsc'),
-			MSG: jsUtil.id('vsc'),
-			CANCEL: jsUtil.id('vsc'),
-			OK: jsUtil.id('vsc')
+			IMG: jsUtil.id('vsc')
 		};
 	},
 	init: function(){
 		this.initData();
 		this.initDom();
+		
 	},
 	initData: function(){
 		this.queryData = {};
 		jsUtil.extend(this.queryData, this.config.params);
 		this.queryData.data = JSON.stringify(this.queryData.data);
+
+		this.config.labelClass = 'vipsc_label_' + this.config.label;
 	},
 	initDom: function(){
 		var self = this;
 		var idMap = this.generateDomId();
+		jsUtil.extend(this.config, idMap);
+
 		Dom.ready(function(argument) {
 			cssUtil.loadStyleStr(styleStr);
 			var el = document.createElement('div');
-			html = Dom.template(html, idMap);
 			html = Dom.template(html, self.config);
 
 			el.innerHTML = html;
@@ -86,7 +88,11 @@ ImageSecureCode.prototype = {
 			// 事件初始化
 			self.bindEvent();
 
+			self.initPlaceholder();
 		});
+	},
+	initPlaceholder: function(){
+		this.placeholder = new Placeholder({el: this.config.elements['INPUT']});
 	},
 	bindEvent: function(){
 		var self = this;
@@ -95,22 +101,6 @@ ImageSecureCode.prototype = {
 			var val = target.value;
 			self.marsData(target, event);
 		});
-		// Dom.onFocus(this.config.elements['INPUT'], function(event) {
-		// 	var target = event.target;
-		// 	var val = target.value;
-		// 	self.marsData(target, event);
-		// });
-		// Dom.onClick(this.config.elements['IMG'], function(event) {
-		// 	var target = event.target;
-		// 	if (target.getAttribute('loading')) {
-		// 		return;
-		// 	}
-		// 	target.setAttribute('loading', true);
-		// 	self.reloadImage().always(function(){
-		// 		target.removeAttribute('loading')
-		// 	});
-		// 	self.marsData(target, event);
-		// });
 		Dom.onClick(this.config.elements['REFRESH'], function(event) {
 			var target = event.target;
 			if (target.getAttribute('loading')) {
@@ -121,18 +111,7 @@ ImageSecureCode.prototype = {
 				target.removeAttribute('loading')
 			});
 			self.marsData(target, event);
-		});
-		Dom.onClick(this.config.elements['CANCEL'], function(event) {
-			var target = event.target;
-			self.close('CANCEL');
-			self.config.onCancel && self.config.onCancel();
-			self.marsData(target, event);
-		});		
-		Dom.onClick(this.config.elements['OK'], function(event) {
-			var target = event.target;
-			self.checkCode(self.config.elements['INPUT'].value);
-			self.marsData(target, event);
-		});								
+		});			
 	},
 	setEls: function(contextEl, idMap){
 		this.config.contextEl = contextEl;
@@ -216,7 +195,7 @@ ImageSecureCode.prototype = {
 		Dom.remove(this.config.contextEl);
 	},
 	destroy: function(){
-		console.log('destroy')
+		this.placeholder.destroy();
 		this.unbindEvent();
 		for(var id in this.config.elements) {
 			this.config.elements[id] = null;
@@ -261,9 +240,7 @@ VipSecureCode.ImageSecureCode = Wrapper;
 
 
 setTimeout(function(){
-	var el = document.createElement('div');
-	el.id = 'demo-id';
-	document.body.appendChild(el);
+
 	var configObject = {
 		url: '../dist/imgwap.js',
 		params: {
@@ -273,13 +250,12 @@ setTimeout(function(){
 			data: {}
 		}
 	};	
-	VipSecureCode.init({xhr2:false});
+	VipSecureCode.init({xhr2:false, JSON: window.JSON3});
 	// 初始化实例
 	var instance = new VipSecureCode.ImageSecureCode({
 		exCls: 'customeCls',
 		params: configObject.params,
-		targetId: el.id,
-
+		targetId: 'target-id'
 	});
 
 

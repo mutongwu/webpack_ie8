@@ -1,10 +1,38 @@
+/**
+ * Checks if given object is a DOMElement
+ * @param {object} element
+ * @returns {boolean}
+ */
+var isElement = function(element) {
+    if (typeof HTMLElement === 'object') {
+        return element instanceof HTMLElement;
+    }
+
+    return element && typeof element === 'object' && element.nodeType === 1 && typeof  element.nodeName === 'string';
+};
+
+/**
+ * Checks if given parameter is a DOMNode
+ * @param node
+ * @returns {*}
+ */
+var isNode = function(node) {
+    if (typeof Node === 'object') {
+        return node instanceof Node;
+    }
+    return node && typeof node === 'object' && typeof node.nodeType === 'number' && typeof node.nodeName === 'string';
+};
+
 function _extendObject(first, second) {
-    for (var secondProp in second) {
+    for (var secondProp in second ) {
         var secondVal = second[secondProp];
-        // Is this value an object?  If so, iterate over its properties, copying them over
         if (secondVal && Object.prototype.toString.call(secondVal) === "[object Object]") {
-            first[secondProp] = first[secondProp] || {};
-            _extendObject(first[secondProp], secondVal);
+        	if(isNode(secondVal) || isElement(secondVal)) {
+        		first[secondProp] = secondVal;
+        	}else {
+	            first[secondProp] = first[secondProp] || {};
+            	_extendObject(first[secondProp], secondVal);
+        	}
         }
         else {
             first[secondProp] = secondVal;
@@ -12,7 +40,6 @@ function _extendObject(first, second) {
     }
     return first;
 };
-
 /**
  * Checks if given value is an array
  * @param {*} object

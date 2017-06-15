@@ -658,6 +658,12 @@
     Dom.Event.ON_DOM_DRAGENTER = 'onDomDragEnter';
     Dom.Event.ON_DOM_DRAGLEAVE = 'onDomDragLeave';
 
+    var id = 1;
+    Dom.uid = function(){
+        return 'id_' + id++;
+    };
+    Dom.Event.EVENT_KEY = '_dom_event_key';
+    Dom.Event.cacheMap = {};
     /**
      * Attaches javascript listener to the element(s) for the given event type
      *
@@ -683,22 +689,36 @@
             throw new Error(element + " is not a DOMNode object");
         }
 
-        element._event = element._event || {};
-        element._event[event] = element._event[event] || { keys:[], values:[] };
-
+        var eventId = Dom.attribute(element, Dom.Event.EVENT_KEY);
+        if (!eventId) {
+            eventId = Dom.uid();
+            Dom.Event.cacheMap[eventId] = {
+                /*
+                    CLICK: { keys:[], values:[] },
+                    FOCUS: { keys:[], values:[] }
+                    ...
+                */
+            };
+        }
+        // element._event = element._event || {};
+        // element._event[event] = element._event[event] || { keys:[], values:[] };
+        var map = Dom.Event.cacheMap[eventId];
+        if (!map[event]) {
+            map[event] = { keys:[], values:[] };
+        }
         //checks if listener already exists
-        if (_indexOf(element._event[event].keys, listener) != -1) {
+        if (_indexOf(map[event].keys, listener) != -1) {
             return Dom;
         }
 
-        element._event[event].keys.push(listener);
+        map[event].keys.push(listener);
         var _listener = function(e) {
             var evt = new Dom.Event(e);
             if (listener.call(element, evt) === false) {
                 e.stop();
             }
         };
-        element._event[event].values.push(_listener);
+        map[event].values.push(_listener);
 
         element[addListener](eventPrefix + event, _listener);
 
@@ -809,27 +829,29 @@
         if (!Dom.isNode(element) && element !== window) {
             throw new Error(element + " is not a DOMNode object");
         }
+        var eventId = Dom.attribute(element, Dom.Event.EVENT_KEY);
+        var map = Dom.Event.cacheMap[eventId];
 
-        if (!element._event || !element._event[event]) {
+        if (!eventId || !map) {
             return false;
         }
 
         if (listener) {
-            var key = _indexOf(element._event[event].keys, listener);
+            var key = _indexOf(map.keys, listener);
             if (key === -1) {
                 return false;
             }
-            var _listener = element._event[event].values[key];
+            var _listener = map.values[key];
 
             element[removeListener](eventPrefix + event, _listener);
-            delete element._event[event].values[key];
-            delete element._event[event].keys[key];
+            delete map.values[key];
+            delete map.keys[key];
         } else {
             // 未提供 listener，删除所有对应 event 函数
             _each(element._event[event].values, function(fn){
                 element[removeListener](eventPrefix + event, fn);
             });
-            delete element._event[event];
+            delete Dom.Event.cacheMap[eventId];
         }
 
 
@@ -1436,8 +1458,16 @@
                 result = element.htmlFor;
             } else if (attribute === 'value' && element['value'] !== undefined) {//value?
                 result = element.value;
-            } else {
+            } else if(element.getAttribute){
                 result = element.getAttribute(attribute);
+            } else {
+                var attrs = element.attributes;
+                var length = attrs.length;
+                for(var i = 0; i < length; i++){
+                    if(attrs[i].nodeName === attr){
+                        result = attrs[i].nodeValue;
+                    }
+                }
             }
 
             if (result === '') {
@@ -1750,7 +1780,7 @@
         var regex = /\{\{.*?\}\}/gi;
 
         return tpl.replace(regex, function replacer(str, pos, tpl) {
-            var properties = str.replace('{{', '').replace('}}', '').trim().split(' ');
+            var properties = str.replace('{{', '').replace('}}', '').replace(/^\s+/,'').replace(/\s+$/,'').split(' ');
             var tag = properties[0];
             if (!tag || !hash.hasOwnProperty(tag)) {
                 return '';

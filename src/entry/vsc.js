@@ -6,6 +6,7 @@ var messenger = require('../lib/messenger');
 var Dom = require('../lib/dom');
 var CorsAjax = require('../utils/corsajax');
 var jsUtil = require('../utils/jsUtil');
+var Placeholder = require('../utils/placeholder');
 
 var vipsc = {
 	cache: {
@@ -65,10 +66,15 @@ var vipsc = {
 	jsUtil:jsUtil,
 	ajax: ajax,
 	Messenger: messenger,
-	Dom: Dom
+	Dom: Dom,
+	Placeholder: Placeholder
 };
 
-
+if(!window.console) {
+	window.console =  {
+		log:function(){}
+	}
+}
 if (window.VipSecureCode) {
 	console.error('VipSecureCode dulplicated.');
 }
